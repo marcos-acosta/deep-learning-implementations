@@ -1,4 +1,5 @@
 import numpy as np
+from . import losses
 
 class NeuralNetwork():
   def __init__(self):
@@ -9,9 +10,8 @@ class NeuralNetwork():
   def add(self, layer):
     self.layers.append(layer)
 
-  def use_loss(self, loss, loss_prime):
-    self.loss = loss
-    self.loss_prime = loss_prime
+  def use_loss(self, loss_name):
+    self.loss, self.loss_prime = losses.loss_map[loss_name]
 
   def predict(self, input_data):
     n_samples = len(input_data)
@@ -37,3 +37,12 @@ class NeuralNetwork():
           error = layer.backward_propagate(error, learning_rate)
       err /= n_samples
       print(f'Epoch {i+1}/{n_epochs} :: loss {err}')
+
+  def __repr__(self):
+    ret = '\nMODEL SUMMARY\n~~~~~~~~~~~~~\n'
+    n_parameters = 0
+    for layer in self.layers:
+      ret += str(layer) + '\n'
+      n_parameters += layer.weights.size + layer.bias.size if layer.has_weights else 0
+    ret += f'\n{n_parameters} trainable parameters\n'
+    return ret

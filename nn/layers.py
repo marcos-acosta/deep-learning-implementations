@@ -1,7 +1,9 @@
 import numpy as np
+from . import activations
 
 class Layer():
   def __init__(self):
+    self.has_weights = False
     self.input = None
     self.output = None
 
@@ -11,9 +13,13 @@ class Layer():
   def backward_propagate(self, output_error, learning_rate):
     raise NotImplementedError
 
+  def __repr__(self):
+    return str(self)
+
 
 class DenseLayer(Layer):
   def __init__(self, input_size, output_size):
+    self.has_weights = True
     self.weights = np.random.rand(input_size, output_size) - 0.5
     self.bias = np.random.rand(1, output_size) - 0.5
 
@@ -30,16 +36,23 @@ class DenseLayer(Layer):
     self.bias -= learning_rate * output_error
     return input_error
 
+  def __repr__(self):
+    return f'[DENSE] :: {self.weights.shape[0]} neurons => {self.weights.shape[1]} neurons'
+
 
 class ActivationLayer(Layer):
-  def __init__(self, activation, activation_prime):
-    self.activation = activation
-    self.activation_prime = activation_prime
+  def __init__(self, activation_fn_name):
+    self.has_weights = False
+    self.activation_name = activation_fn_name
+    self.activation, self.activation_prime = activations.activation_map[activation_fn_name]
 
   def forward_propagate(self, input_data):
-      self.input = input_data
-      self.output = self.activation(self.input)
-      return self.output
+    self.input = input_data
+    self.output = self.activation(self.input)
+    return self.output
 
   def backward_propagate(self, output_error, learning_rate):
-      return self.activation_prime(self.input) * output_error
+    return self.activation_prime(self.input) * output_error
+
+  def __repr__(self):
+    return f'[ACTIVATION] :: {self.activation_name}'
