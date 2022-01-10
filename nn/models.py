@@ -1,5 +1,6 @@
 import numpy as np
 from . import losses
+from . import metrics
 
 class NeuralNetwork():
   def __init__(self):
@@ -23,12 +24,19 @@ class NeuralNetwork():
       result.append(output)
     return np.array(result)
 
-  def fit(self, x_train, y_train, n_epochs, learning_rate):
-    n_samples = len(x_train)
+  def evaluate(self, X_test, y_test, classification=False):
+    pred = self.predict(X_test)
+    if classification:
+      return metrics.accuracy(y_test, pred)
+    else:
+      return losses.mse(y_test, pred)
+
+  def fit(self, X_train, y_train, n_epochs, learning_rate):
+    n_samples = len(X_train)
     for i in range(n_epochs):
       err = 0
       for j in range(n_samples):
-        output = x_train[j]
+        output = X_train[j]
         for layer in self.layers:
           output = layer.forward_propagate(output)
         err += self.loss(y_train[j], output)

@@ -19,6 +19,7 @@ class Layer():
 
 class DenseLayer(Layer):
   def __init__(self, input_size, output_size):
+    super().__init__()
     self.has_weights = True
     self.weights = np.random.rand(input_size, output_size) - 0.5
     self.bias = np.random.rand(1, output_size) - 0.5
@@ -42,7 +43,7 @@ class DenseLayer(Layer):
 
 class ActivationLayer(Layer):
   def __init__(self, activation_fn_name):
-    self.has_weights = False
+    super().__init__()
     self.activation_name = activation_fn_name
     self.activation, self.activation_prime = activations.activation_map[activation_fn_name]
 
@@ -56,3 +57,19 @@ class ActivationLayer(Layer):
 
   def __repr__(self):
     return f'[ACTIVATION] :: {self.activation_name}'
+
+class Dropout(Layer):
+  def __init__(self, rate):
+    super().__init__()
+    self.dropout_rate = rate
+
+  def forward_propagate(self, input_data):
+    self.input = input_data
+    self.output = np.vectorize(lambda x: 0 if np.random.random() < self.dropout_rate else x)(input_data)
+    return self.output
+
+  def backward_propagate(self, output_error, learning_rate):
+      return output_error
+
+  def __repr__(self):
+    return f'[DROPOUT] :: rate {self.dropout_rate}'

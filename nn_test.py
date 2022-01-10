@@ -1,5 +1,5 @@
 from nn.models import NeuralNetwork
-from nn.layers import DenseLayer, ActivationLayer
+from nn.layers import DenseLayer, ActivationLayer, Dropout
 from argparse import ArgumentParser
 import numpy as np
 
@@ -18,12 +18,12 @@ def xor_test():
   net.add(DenseLayer(2, 3))
   net.add(ActivationLayer("tanh"))
   net.add(DenseLayer(3, 1))
-  net.add(ActivationLayer("tanh"))
+  net.add(ActivationLayer("sigmoid"))
 
   print(net)
 
   net.use_loss("mse")
-  net.fit(X_train, y_train, n_epochs=1000, learning_rate=0.1)
+  net.fit(X_train, y_train, n_epochs=100, learning_rate=0.1)
 
   out = net.predict(X_train)
   print(out)
@@ -46,6 +46,7 @@ def mnist_test():
   net.add(DenseLayer(28*28, 100))
   net.add(ActivationLayer("tanh"))
   net.add(DenseLayer(100, 50))
+  net.add(Dropout(0.2))
   net.add(ActivationLayer("tanh"))
   net.add(DenseLayer(50, 10))
   net.add(ActivationLayer("softmax"))
@@ -56,10 +57,13 @@ def mnist_test():
   net.fit(X_train[0:1000], y_train[0:1000], n_epochs=50, learning_rate=0.1)
   sample_indexes = np.random.randint(0, len(X_test), 10)
 
+  print(f'[TEST ACCURACY] :: {net.evaluate(X_test, y_test, classification=True)}')
+
+  print('\n[SAMPLE PREDICTIONS]')
   out = net.predict(X_test[sample_indexes])
-  print("\nPredicted values")
+  print("Predicted values")
   print(np.squeeze(np.argmax(out, axis=-1)))
-  print("\nTrue values")
+  print("True values")
   print(np.argmax(y_test[sample_indexes], axis=-1))
 
 if __name__ == '__main__':
